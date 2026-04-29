@@ -1,0 +1,26 @@
+# Python environment
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Database and sensitive data
+data/
+*.db
+*.sqlite3
+
+# ML Models (if they are too large, but .pkl might be small enough. Excluding just in case they grow)
+# models/*.pkl 
+
+# Environment variables
+.env
+.env.local
+
+# Agent / Tool folders
+.agent/
+.gemini/
+.gsd/
+
+# OS generated files
+.DS_Store
+Thumbs.db

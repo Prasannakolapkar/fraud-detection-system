@@ -1,0 +1,12 @@
+2026-03-13 17:22:05,305 - INFO - Loaded 3 face embeddings from central vault
+2026-03-13 17:22:05,563 - INFO - Biometric models initialized on cpu
+2026-03-13 17:22:05,564 - INFO - FaceNet (InceptionResnetV1) 512-dim embedding engine ready.
+INFO:     Started server process [15008]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+ERROR:    [Errno 10048] error while attempting to bind on address ('0.0.0.0', 8000): [winerror 10048] only one usage of each socket address (protocol/network address/port) is normally permitted
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+Initializing Fraud Detection Pipeline...
+Model loaded from C:\Users\kolap\OneDrive\Desktop\Projects\FraudDetection_Project\FraudDetection_Project\src\api\../models/fraud_model.pkl
+[INFO] Loaded pre-trained fraud classifier

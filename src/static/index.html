@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecurePay FaceAuth | Seamless Face Payments</title>
+    <!-- Favicon -->
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛡️</text></svg>">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- MediaPipe Face Mesh -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+
+<body>
+
+    <nav>
+        <div class="logo" onclick="showPage('home')">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                <path d="M12 8v4M12 16h.01" stroke-linecap="round" />
+            </svg>
+            SecurePay
+        </div>
+        <div id="nav-info" style="font-size: 0.9rem; color: var(--text-dim);">Made for FaceAuth</div>
+    </nav>
+
+    <main>
+        <!-- Home Page -->
+        <section id="home-page" class="page active fade-in">
+            <h1>Face Based Authentication</h1>
+            <p>Seamless, secure payments powered by Biometric AI.</p>
+            <div class="hero-actions">
+                <button class="btn btn-primary" onclick="showPage('transaction')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 4H3a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z" />
+                        <path d="M1 10h22" />
+                    </svg>
+                    Make Transaction
+                </button>
+                <button class="btn btn-outline" onclick="showPage('register')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                        <circle cx="8.5" cy="7" r="4" />
+                        <line x1="20" y1="8" x2="20" y2="14" />
+                        <line x1="17" y1="11" x2="23" y2="11" />
+                    </svg>
+                    Register
+                </button>
+                <button class="btn btn-outline" style="border-color: var(--warning); color: var(--text-main);"
+                    onclick="showPage('dashboard')">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7" />
+                        <rect x="14" y="3" width="7" height="7" />
+                        <rect x="14" y="14" width="7" height="7" />
+                        <rect x="3" y="14" width="7" height="7" />
+                    </svg>
+                    Admin Dashboard
+                </button>
+            </div>
+        </section>
+
+        <!-- Admin Dashboard -->
+        <section id="dashboard-page" class="page">
+            <div class="glass-card" style="max-width: 700px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                    <h2 style="margin: 0;">Admin Dashboard</h2>
+                    <button class="btn btn-outline" style="padding: 0.5rem 1rem; font-size: 0.85rem;"
+                        onclick="showPage('home')">← Back</button>
+                </div>
+
+                <!-- Stats Cards -->
+                <div style="display: flex; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap;">
+                    <div
+                        style="flex: 1; min-width: 120px; background: linear-gradient(135deg, rgba(0,212,255,0.15), rgba(0,212,255,0.05)); border: 1px solid rgba(0,212,255,0.3); border-radius: 16px; padding: 1.2rem; text-align: center;">
+                        <div id="stat-total-users" style="font-size: 2.5rem; font-weight: 700; color: var(--primary);">-
+                        </div>
+                        <div style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0.3rem;">Registered Users
+                        </div>
+                    </div>
+                    <div
+                        style="flex: 1; min-width: 120px; background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(16,185,129,0.05)); border: 1px solid rgba(16,185,129,0.3); border-radius: 16px; padding: 1.2rem; text-align: center;">
+                        <div id="stat-total-tx" style="font-size: 2.5rem; font-weight: 700; color: var(--success);">-
+                        </div>
+                        <div style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0.3rem;">Total Transactions
+                        </div>
+                    </div>
+                    <div
+                        style="flex: 1; min-width: 120px; background: linear-gradient(135deg, rgba(244,63,94,0.15), rgba(244,63,94,0.05)); border: 1px solid rgba(244,63,94,0.3); border-radius: 16px; padding: 1.2rem; text-align: center;">
+                        <div id="stat-blocked-tx" style="font-size: 2.5rem; font-weight: 700; color: var(--error);">-
+                        </div>
+                        <div style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0.3rem;">Blocked (Fraud)
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Users Table -->
+                <h3
+                    style="margin-bottom: 1rem; color: var(--text-dim); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;">
+                    Registered Users</h3>
+                <div style="overflow-x: auto; margin-bottom: 3rem;">
+                    <table id="users-table"
+                        style="width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.9rem;">
+                        <thead>
+                            <tr style="text-align: left;">
+                                <th
+                                    style="padding: 0.8rem 1rem; color: var(--primary); border-bottom: 1px solid var(--glass-border); font-weight: 600;">
+                                    #</th>
+                                <th
+                                    style="padding: 0.8rem 1rem; color: var(--primary); border-bottom: 1px solid var(--glass-border); font-weight: 600;">
+                                    User ID</th>
+                                <th
+                                    style="padding: 0.8rem 1rem; color: var(--primary); border-bottom: 1px solid var(--glass-border); font-weight: 600;">
+                                    Email</th>
+                                <th
+                                    style="padding: 0.8rem 1rem; color: var(--primary); border-bottom: 1px solid var(--glass-border); font-weight: 600;">
+                                    Card Number</th>
+                                <th
+                                    style="padding: 0.8rem 1rem; color: var(--primary); border-bottom: 1px solid var(--glass-border); font-weight: 600;">
+                                    Role</th>
+                                <th
+                                    style="padding: 0.8rem 1rem; color: var(--primary); border-bottom: 1px solid var(--glass-border); font-weight: 600;">
+                                    Enrolled</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-table-body">
+                            <tr>
+                                <td colspan="6" style="padding: 2rem; text-align: center; color: var(--text-dim);">
+                                    Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Transaction History Table -->
+                <h3
+                    style="margin-bottom: 1rem; color: var(--text-dim); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;">
+                    Recent Transactions</h3>
+                <div style="overflow-x: auto; margin-bottom: 3rem; max-height: 400px; overflow-y: auto;">
+                    <table id="tx-table"
+                        style="width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.9rem;">
+                        <thead
+                            style="position: sticky; top: 0; background: var(--glass-bg); backdrop-filter: blur(10px); z-index: 1;">
+                            <tr style="text-align: left;">
+                                <th
+                                    style="padding: 0.8rem 1rem; color: var(--primary); border-bottom: 1px solid var(--glass-border); font-weight: 600;">
+                                    Time</th>
+                                <th
+                                    style="padding: 0.8rem 1rem; color: var(--primary); border-bottom: 1px solid var(--glass-border); font-weight: 600;">
+                                    User</th>
+                                <th
+                                    style="padding: 0.8rem 1rem; color: var(--primary); border-bottom: 1px solid var(--glass-border); font-weight: 600;">
+                                    Amount</th>
+                                <th
+                                    style="padding: 0.8rem 1rem; color: var(--primary); border-bottom: 1px solid var(--glass-border); font-weight: 600;">
+                                    Decision</th>
+                                <th
+                                    style="padding: 0.8rem 1rem; color: var(--primary); border-bottom: 1px solid var(--glass-border); font-weight: 600;">
+                                    Fraud Score</th>
+                                <th
+                                    style="padding: 0.8rem 1rem; color: var(--primary); border-bottom: 1px solid var(--glass-border); font-weight: 600;">
+                                    Face Match</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tx-table-body">
+                            <tr>
+                                <td colspan="6" style="padding: 2rem; text-align: center; color: var(--text-dim);">
+                                    Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- System Settings Info -->
+                <h3
+                    style="margin-bottom: 1rem; color: var(--text-dim); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px;">
+                    System Settings</h3>
+                <div
+                    style="display: flex; gap: 1rem; flex-wrap: wrap; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); border-radius: 12px; padding: 1.5rem;">
+                    <div style="flex: 1; min-width: 150px;">
+                        <div style="font-size: 0.85rem; color: var(--text-dim);">ML Fraud Threshold</div>
+                        <div id="set-fraud-thresh" style="font-size: 1.2rem; font-weight: 600; font-family: monospace;">
+                            -</div>
+                    </div>
+                    <div style="flex: 1; min-width: 150px;">
+                        <div style="font-size: 0.85rem; color: var(--text-dim);">ML Review Threshold</div>
+                        <div id="set-review-thresh"
+                            style="font-size: 1.2rem; font-weight: 600; font-family: monospace;">-</div>
+                    </div>
+                    <div style="flex: 1; min-width: 150px;">
+                        <div style="font-size: 0.85rem; color: var(--text-dim);">Face Match Threshold</div>
+                        <div id="set-face-thresh" style="font-size: 1.2rem; font-weight: 600; font-family: monospace;">-
+                        </div>
+                    </div>
+                    <div style="flex: 1; min-width: 150px;">
+                        <div style="font-size: 0.85rem; color: var(--text-dim);">Face Engine Mode</div>
+                        <div id="set-face-mode" style="font-size: 1.2rem; font-weight: 600;">-</div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Transaction Flow -->
+        <section id="transaction-page" class="page">
+            <div class="glass-card">
+                <div
+                    style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                    <h2 style="margin: 0;">Security Checkout</h2>
+                    <button class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;"
+                        onclick="showPage('home')">← Cancel</button>
+                </div>
+                <p style="color: var(--text-dim); margin-bottom: 2rem">Confirm payment of ₹599.00</p>
+
+                <!-- Step 1: Card Form -->
+                <div id="tx-step-1">
+                    <div class="card-preview">
+                        <div class="card-chip"></div>
+                        <div class="card-num" id="preview-card-num">•••• •••• •••• ••••</div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <div id="preview-holder">CARDHOLDER</div>
+                            <div id="preview-expiry">MM/YY</div>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Registered User ID</label>
+                        <input type="text" id="tx-user-id" placeholder="Enter your registered user ID">
+                    </div>
+                    <div class="input-group">
+                        <label>Card Number</label>
+                        <input type="text" id="card-num" placeholder="4111 2222 3333 4444" maxlength="19">
+                    </div>
+                    <div style="display: flex; gap: 1rem">
+                        <div class="input-group" style="flex: 2">
+                            <label>Expiry Date</label>
+                            <input type="text" id="card-expiry" placeholder="MM/YY" maxlength="5">
+                        </div>
+                        <div class="input-group" style="flex: 1">
+                            <label>CVC</label>
+                            <input type="password" id="card-cvc" placeholder="***" maxlength="3">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" style="width: 100%" onclick="handleGenOTP()">Generate OTP</button>
+                </div>
+
+                <!-- Step 2: OTP Verification -->
+                <div id="tx-step-2" style="display: none">
+                    <div class="success-circle" style="background: rgba(0, 212, 255, 0.1); color: var(--primary)">📱
+                    </div>
+                    <h3>Verify Mobile OTP</h3>
+                    <p style="color: var(--text-dim)">Enter the OTP to continue</p>
+
+                    <!-- OTP display box for testing -->
+                    <div id="otp-display-box"
+                        style="margin: 1rem auto; padding: 1rem 1.5rem; background: rgba(16, 185, 129, 0.1); border: 1px solid var(--success); border-radius: 12px; font-size: 1.4rem; letter-spacing: 6px; font-weight: 700; color: var(--success); display: none;">
+                        OTP: <span id="otp-display-value"></span>
+                    </div>
+
+                    <div class="otp-container">
+                        <input type="text" class="otp-input" maxlength="1">
+                        <input type="text" class="otp-input" maxlength="1">
+                        <input type="text" class="otp-input" maxlength="1">
+                        <input type="text" class="otp-input" maxlength="1">
+                        <input type="text" class="otp-input" maxlength="1">
+                        <input type="text" class="otp-input" maxlength="1">
+                    </div>
+                    <p id="otp-timer">Expires in 60s</p>
+                    <div id="otp-error" style="color: var(--error); margin: 0.5rem 0; display: none; font-weight: 600;">
+                    </div>
+                    <button class="btn btn-primary" style="width: 100%; margin-top: 1rem" onclick="verifyOTP()">Verify
+                        OTP</button>
+                </div>
+
+                <!-- Step 3: Face Auth -->
+                <div id="tx-step-3" style="display: none">
+                    <h3>Face Identification</h3>
+                    <p style="color: var(--text-dim); margin-bottom: 1.5rem">Look directly into the camera</p>
+                    <div id="video-container">
+                        <video id="tx-video" autoplay playsinline></video>
+                        <div class="face-overlay"></div>
+                        <div id="liveness-overlay">Initializing Face Check...</div>
+                    </div>
+                    <!-- Manual auth button restored, but locked until liveness passes -->
+                    <button id="capture-btn" class="btn btn-primary" style="width: 100%; margin-top: 1rem;"
+                        onclick="simulateFaceAuth()" disabled>Waiting for Liveness Check...</button>
+                </div>
+
+                <!-- Step 4: Success -->
+                <div id="tx-step-4" style="display: none">
+                    <div class="success-circle"
+                        style="background: rgba(16, 185, 129, 0.1); color: var(--success); border-color: var(--success);">
+                        ✓</div>
+                    <h2 style="color: var(--success)">Payment Successful</h2>
+                    <p style="font-size: 1.5rem; margin: 1rem 0; font-weight: 600;">$599.00</p>
+                    <p id="tx-success-id" style="color: var(--text-dim); margin-bottom: 2rem">TxID: ---</p>
+                    <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                        <button class="btn btn-primary" style="flex: 1;" onclick="showPage('transaction')">Make Another
+                            Payment</button>
+                        <button class="btn btn-outline" style="flex: 1;" onclick="showPage('home')">Return Home</button>
+                    </div>
+                </div>
+
+                <!-- Step 5: Fraud Detected -->
+                <div id="tx-step-fraud" style="display: none">
+                    <div class="success-circle" style="background: var(--error)">🚫</div>
+                    <h2 style="color: var(--error)">Fraud Detected!</h2>
+                    <p style="color: var(--text-dim); margin: 1rem 0; font-size: 1rem">Face verification failed —
+                        identity does not match the registered cardholder.</p>
+                    <div
+                        style="background: rgba(244, 63, 94, 0.1); border: 1px solid var(--error); border-radius: 12px; padding: 1rem; margin: 1rem 0;">
+                        <p style="color: var(--error); font-weight: 600;">⚠ Alert notification sent to the registered
+                            cardholder. Transaction Terminated.</p>
+                    </div>
+                    <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                        <button class="btn btn-primary" style="flex: 1;" onclick="showPage('transaction')">Make Another
+                            Payment</button>
+                        <button class="btn btn-outline" style="flex: 1;" onclick="showPage('home')">Return Home</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Register Page -->
+        <section id="register-page" class="page">
+            <div class="glass-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <div class="progress-bar" style="margin: 0; flex: 1; max-width: 250px;">
+                        <div class="step active" id="step-dot-1">1</div>
+                        <div class="step" id="step-dot-2">2</div>
+                        <div class="step" id="step-dot-3">3</div>
+                    </div>
+                    <button class="btn btn-outline"
+                        style="padding: 0.4rem 0.8rem; font-size: 0.8rem; height: max-content;"
+                        onclick="showPage('home')">← Back</button>
+                </div>
+
+                <div id="reg-step-1">
+                    <h2 style="margin-bottom: 1.5rem">Personal Info</h2>
+                    <div class="input-group">
+                        <label>User ID (Unique)</label>
+                        <input type="text" id="reg-user-id" placeholder="alice_green">
+                    </div>
+                    <div class="input-group">
+                        <label>Email Address</label>
+                        <input type="email" id="reg-email" placeholder="alice@example.com">
+                    </div>
+                    <div class="input-group">
+                        <label>Phone Number</label>
+                        <input type="text" id="reg-phone" placeholder="98765 43210" maxlength="10">
+                    </div>
+                    <button class="btn btn-primary" style="width: 100%" onclick="nextRegStep(2)">Next</button>
+                </div>
+
+                <div id="reg-step-2" style="display: none">
+                    <h2 style="margin-bottom: 1.5rem">Card Onboarding</h2>
+                    <div class="input-group">
+                        <label>Card Number</label>
+                        <input type="text" id="reg-card-num" placeholder="XXXX XXXX XXXX XXXX" maxlength="19">
+                    </div>
+                    <div style="display: flex; gap: 1rem">
+                        <div class="input-group" style="flex: 2">
+                            <label>Expiry</label>
+                            <input type="text" id="reg-card-expiry" placeholder="MM/YY" maxlength="5">
+                        </div>
+                        <div class="input-group" style="flex: 1">
+                            <label>CVC</label>
+                            <input type="password" id="reg-card-cvc" placeholder="***" maxlength="3">
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 1rem">
+                        <button class="btn btn-outline" style="flex: 1" onclick="nextRegStep(1)">Back</button>
+                        <button class="btn btn-primary" style="flex: 2" onclick="nextRegStep(3)">Next</button>
+                    </div>
+                </div>
+
+                <div id="reg-step-3" style="display: none">
+                    <h2 style="margin-bottom: 0.5rem">Face Enrollment</h2>
+                    <p style="color: var(--text-dim); margin-bottom: 1.5rem">Capture 3 clear photos of your face</p>
+                    <div id="reg-video-container"
+                        style="height: 200px; border-radius: 20px; background: #000; margin-bottom: 1rem; position: relative; border: 2px solid var(--primary); overflow: hidden;">
+                        <video id="reg-video" autoplay playsinline
+                            style="width: 100%; height: 100%; object-fit: cover;"></video>
+                    </div>
+                    <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 1.5rem">
+                        <div class="shot-dot" id="shot-1"
+                            style="width: 10px; height: 10px; border-radius: 50%; background: var(--glass-border);">
+                        </div>
+                        <div class="shot-dot" id="shot-2"
+                            style="width: 10px; height: 10px; border-radius: 50%; background: var(--glass-border);">
+                        </div>
+                        <div class="shot-dot" id="shot-3"
+                            style="width: 10px; height: 10px; border-radius: 50%; background: var(--glass-border);">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" style="width: 100%" id="reg-capture-btn"
+                        onclick="captureFaceShot()">Capture Shot</button>
+                </div>
+
+                <div id="reg-step-4" style="display: none">
+                    <div class="success-circle">✓</div>
+                    <h3>Registration Complete</h3>
+                    <p style="color: var(--text-dim); margin-top: 1rem">You can now pay using your face at any SecurePay
+                        merchant.</p>
+                    <button class="btn btn-primary" style="width: 100%; margin-top: 2rem"
+                        onclick="showPage('home')">Start Transacting</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="toast">Invalid Card Details</div>
+
+    <canvas id="hidden-canvas" style="display: none;"></canvas>
+
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="/static/app.js"></script>
+
+    <style>
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</body>
+
+</html>
