@@ -1,7 +1,7 @@
         // --- API Config ---
         const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
             ? "http://localhost:8000" 
-            : ""; // Relative paths if hosted on same domain, otherwise replace with your Render URL
+            : "https://fraud-detection-system-8917.onrender.com"; 
 
         const state = {
             currentPage: 'home',
