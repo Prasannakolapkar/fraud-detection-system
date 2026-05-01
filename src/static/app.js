@@ -678,9 +678,13 @@
 
             try {
                 const userId = document.getElementById('tx-user-id').value.trim();
+                console.log(`[API] Sending transaction to: ${API_BASE}/transaction`);
                 const res = await fetch(`${API_BASE}/transaction`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
                     body: JSON.stringify({
                         user_id: userId,
                         card_number: document.getElementById('card-num').value.replace(/\s+/g, ''),
@@ -691,6 +695,16 @@
                 });
 
                 const result = await res.json();
+                console.log("[API] Response Status:", res.status);
+                console.log("[API] Response Body:", result);
+
+                if (!res.ok) {
+                    // Handle FastAPI 422 (Validation) or 400 (Business Logic) errors
+                    const errMsg = result.message || result.detail || "Transaction Error";
+                    showToast(errMsg, "error");
+                    if (scanLine) scanLine.style.display = 'none';
+                    return;
+                }
 
                 if (result.decision === "APPROVED") {
                     confetti({

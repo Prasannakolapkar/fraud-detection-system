@@ -106,12 +106,14 @@ if FASTAPI_AVAILABLE:
     )
 
     # --- Middleware ---
+    # Robust CORS setup for Cloudflare -> Render integration
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],  # In production, replace with your Cloudflare Pages URL
+        allow_origins=["*"],
         allow_credentials=True,
-        allow_methods=["*"],
+        allow_methods=["GET", "POST", "OPTIONS", "PUT", "DELETE"],
         allow_headers=["*"],
+        expose_headers=["*"]
     )
 
     # --- Mount Static Files (Only for local dev) ---
