@@ -109,9 +109,9 @@ if FASTAPI_AVAILABLE:
     # Robust CORS setup for Cloudflare -> Render integration
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
+        allow_origins=["*"], # Cloudflare domain + wildcard for testing
         allow_credentials=True,
-        allow_methods=["GET", "POST", "OPTIONS", "PUT", "DELETE"],
+        allow_methods=["GET", "POST", "OPTIONS"],
         allow_headers=["*"],
         expose_headers=["*"]
     )
@@ -362,12 +362,34 @@ if FASTAPI_AVAILABLE:
             message=messages.get(result["final_decision"], "Processing complete.")
         )
 
-    @app.get("/stats", response_model=StatsResponse, summary="Pipeline statistics")
+    @app.get("/stats", summary="Pipeline statistics")
     async def get_stats():
-        stats = pipeline.get_stats()
-        return StatsResponse(**{k: stats[k] for k in StatsResponse.__fields__ if k in stats})
+        """Returns overall transaction statistics."""
+        try:
+            stats = pipeline.db_manager.get_stats()
+            return stats
+        except Exception as e:
+            raise AppException(status_code=500, message=f"Database error: {str(e)}")
 
-    @app.get("/dashboard", summary="Admin dashboard — registered users, stats, & history")
+    @app.get("/transactions", summary="Transaction history")
+    async def get_transactions(limit: int = 50):
+        """Returns recent transactions."""
+        try:
+            history = pipeline.db_manager.get_history(limit=limit)
+            return history
+        except Exception as e:
+            raise AppException(status_code=500, message=f"Database error: {str(e)}")
+
+    @app.get("/users", summary="Registered users list")
+    async def get_users():
+        """Returns a list of all registered users."""
+        try:
+            users = pipeline.db_manager.list_users_detail()
+            return users
+        except Exception as e:
+            raise AppException(status_code=500, message=f"Database error: {str(e)}")
+            
+    @app.get("/dashboard", summary="Legacy dashboard endpoint")
     async def get_dashboard():
         users = pipeline.db_manager.list_users_detail()
         stats = pipeline.db_manager.get_stats()

@@ -137,23 +137,37 @@
 
         // --- Dashboard ---
         async function loadDashboard() {
+            console.log("[API] Fetching dashboard data...");
             try {
-                const res = await fetch(`${API_BASE}/dashboard`);
-                if (!res.ok) throw new Error('Failed to load');
-                const data = await res.json();
+                // Fetch stats, users, and transactions concurrently
+                const [statsRes, usersRes, txRes] = await Promise.all([
+                    fetch(`${API_BASE}/stats`),
+                    fetch(`${API_BASE}/users`),
+                    fetch(`${API_BASE}/transactions`)
+                ]);
 
-                // Stats
-                document.getElementById('stat-total-users').textContent = data.total_users || 0;
-                const txStats = data.transaction_stats || {};
-                document.getElementById('stat-total-tx').textContent = txStats.total_processed || 0;
-                document.getElementById('stat-blocked-tx').textContent = txStats.total_blocked || 0;
+                if (!statsRes.ok || !usersRes.ok || !txRes.ok) {
+                    throw new Error('Failed to load one or more dashboard endpoints');
+                }
+
+                const stats = await statsRes.json();
+                const users = await usersRes.json();
+                const transactions = await txRes.json();
+                
+                console.log("[API] Stats:", stats);
+                console.log("[API] Users:", users);
+
+                // Stats Update
+                document.getElementById('stat-total-users').textContent = users.length || 0;
+                document.getElementById('stat-total-tx').textContent = stats.total_transactions || 0;
+                document.getElementById('stat-blocked-tx').textContent = stats.blocked || 0;
 
                 // Users table
                 const tbody = document.getElementById('users-table-body');
-                if (!data.users || data.users.length === 0) {
+                if (!users || users.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="6" style="padding: 2rem; text-align: center; color: var(--text-dim);">No users registered yet</td></tr>';
                 } else {
-                    tbody.innerHTML = data.users.map((u, i) => `
+                    tbody.innerHTML = users.map((u, i) => `
                         <tr style="animation: fadeIn 0.3s ease ${i * 0.05}s both;">
                             <td style="padding: 0.8rem 1rem; border-bottom: 1px solid var(--glass-border);">${i + 1}</td>
                             <td style="padding: 0.8rem 1rem; border-bottom: 1px solid var(--glass-border); font-weight: 600;">${u.user_id}</td>
@@ -173,10 +187,10 @@
 
                 // Transaction History Table
                 const txBody = document.getElementById('tx-table-body');
-                if (!data.transactions || data.transactions.length === 0) {
+                if (!transactions || transactions.length === 0) {
                     txBody.innerHTML = '<tr><td colspan="6" style="padding: 2rem; text-align: center; color: var(--text-dim);">No transactions yet</td></tr>';
                 } else {
-                    txBody.innerHTML = data.transactions.map((tx, i) => {
+                    txBody.innerHTML = transactions.map((tx, i) => {
                         let decColor = 'var(--text)';
                         if (tx.decision === 'APPROVED') decColor = 'var(--success)';
                         else if (tx.decision.includes('BLOCKED')) decColor = 'var(--error)';
@@ -195,25 +209,17 @@
                     }).join('');
                 }
 
-                // System Settings
-                if (data.settings) {
-                    document.getElementById('set-fraud-thresh').textContent = data.settings.fraud_threshold.toFixed(2);
-                    document.getElementById('set-review-thresh').textContent = data.settings.review_threshold.toFixed(2);
-                    document.getElementById('set-face-thresh').textContent = data.settings.face_match_threshold.toFixed(2);
-
-                    const modeEl = document.getElementById('set-face-mode');
-                    if (data.settings.is_demo_mode) {
-                        modeEl.textContent = 'DEMO';
-                        modeEl.style.color = 'var(--warning)';
-                    } else {
-                        modeEl.textContent = 'DEEP CNN';
-                        modeEl.style.color = 'var(--success)';
-                    }
-                }
-
+                // System Settings (Optional, leaving static if not fetched)
+                // document.getElementById('set-fraud-thresh').textContent = '0.75';
+                // document.getElementById('set-review-thresh').textContent = '0.50';
+                
             } catch (err) {
-                console.error(err);
+                console.error("[API] Error fetching dashboard:", err);
                 showToast('Failed to load dashboard data');
+                
+                // CRITICAL FIX: Replace "Loading..." with Error message
+                document.getElementById('users-table-body').innerHTML = `<tr><td colspan="6" style="padding: 2rem; text-align: center; color: var(--error); font-weight: 600;">Failed to fetch users from backend.</td></tr>`;
+                document.getElementById('tx-table-body').innerHTML = `<tr><td colspan="6" style="padding: 2rem; text-align: center; color: var(--error); font-weight: 600;">Failed to fetch transactions from backend.</td></tr>`;
             }
         }
 
