@@ -117,7 +117,8 @@ if FASTAPI_AVAILABLE:
     )
 
     # --- Mount Static Files (Only for local dev) ---
-    static_path = os.path.join(os.path.dirname(__file__), "static")
+    # Corrected path to point to src/static relative to src/api
+    static_path = os.path.join(os.path.dirname(__file__), "..", "static")
     if os.path.exists(static_path):
         app.mount("/static", StaticFiles(directory=static_path), name="static")
     else:
